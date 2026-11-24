@@ -13,8 +13,6 @@
 
 <style>
 
-/* CONFIGURACIÓN GENERAL */
-
 * {
     margin: 0;
     padding: 0;
@@ -26,8 +24,6 @@ html, body {
     height: 100%;
     overflow: hidden;
 }
-
-/* FONDO */
 
 body {
     font-family: 'Montserrat', sans-serif;
@@ -73,23 +69,23 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 2vw;
+    padding: 3vmin;
 }
 
 /* ETIQUETA */
 
 .etiqueta {
-    font-size: clamp(18px, 4vw, 46px);
+    font-size: 4.2vmin;
     font-weight: 800;
     font-style: italic;
     text-transform: uppercase;
-    margin-bottom: 0.5vw;
+    margin-bottom: 0.8vmin;
 }
 
 /* RELOJ */
 
 .hora {
-    font-size: clamp(65px, 19vw, 290px);
+    font-size: clamp(48px, 27vmin, 900px);
     font-weight: 800;
     font-style: italic;
     line-height: 0.95;
@@ -118,10 +114,10 @@ body {
 /* FECHA */
 
 .fecha {
-    font-size: clamp(16px, 4vw, 48px);
+    font-size: 4vmin;
     font-weight: 400;
     text-transform: uppercase;
-    margin-top: 1.5vw;
+    margin-top: 2vmin;
     letter-spacing: 0.01em;
 }
 
@@ -146,13 +142,11 @@ body {
 
 <script>
 
-/* RELOJ CON HORA DE GUATEMALA */
+// RELOJ CON HORA DE GUATEMALA
 
 function actualizarReloj() {
 
     const ahora = new Date();
-
-    // Obtener hora de Guatemala
 
     const formatoHora = new Intl.DateTimeFormat('es-GT', {
         timeZone: 'America/Guatemala',
@@ -169,7 +163,7 @@ function actualizarReloj() {
     document.getElementById('hora').innerHTML =
         horas + '<span class="dos-puntos">:</span>' + minutos;
 
-    // Obtener fecha de Guatemala
+    // FECHA DE GUATEMALA
 
     const formatoFecha = new Intl.DateTimeFormat('es-GT', {
         timeZone: 'America/Guatemala',
@@ -182,11 +176,9 @@ function actualizarReloj() {
 
 }
 
-// Actualizar reloj inmediatamente
+// ACTUALIZACIÓN AUTOMÁTICA
 
 actualizarReloj();
-
-// Actualizar cada segundo
 
 setInterval(actualizarReloj, 1000);
 
