@@ -7,14 +7,12 @@
 
 <title>RELOJ GUATEMALA</title>
 
-<!-- MONTSERRAT -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;0,800;1,800&display=swap" rel="stylesheet">
 
 <style>
-
-/* CONFIGURACIÓN GENERAL */
 
 * {
     margin: 0;
@@ -30,7 +28,7 @@ html, body {
 
 body {
     font-family: 'Montserrat', sans-serif;
-    color: #FFFFFF;
+    color: white;
 
     background:
         radial-gradient(
@@ -58,52 +56,60 @@ body {
         );
 }
 
-/* CONTENEDOR */
+/* ÁREA COMPLETA */
 
-.contenedor {
-    --clock-size: 200px;
-
+.pantalla {
     width: 100%;
     height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
 
+/* GRUPO TIPOGRÁFICO */
+
+.grupo {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
 
-    text-align: center;
-    padding: 3%;
+    width: max-content;
+    max-width: none;
 
-    gap: calc(var(--clock-size) * 0.035);
+    font-size: 100px;
+    gap: 0.035em;
+
+    white-space: nowrap;
+
+    transform-origin: center center;
+    will-change: transform;
 }
 
 /* TEXTO SUPERIOR */
 
 .etiqueta {
-    font-size: calc(var(--clock-size) * 0.22);
+    font-size: 0.24em;
     font-weight: 800;
     font-style: italic;
     text-transform: uppercase;
-    line-height: 1.05;
-    white-space: nowrap;
+    line-height: 1.1;
 }
 
-/* HORA PRINCIPAL */
+/* HORA */
 
 .hora {
-    font-size: var(--clock-size);
+    font-size: 1em;
     font-weight: 800;
     font-style: italic;
-
     line-height: 0.95;
     letter-spacing: -0.065em;
-
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
-    flex-shrink: 0;
 }
 
-/* DOS PUNTOS PARPADEANTES */
+/* DOS PUNTOS */
 
 .dos-puntos {
     display: inline-block;
@@ -123,15 +129,14 @@ body {
 /* FECHA */
 
 .fecha {
-    font-size: calc(var(--clock-size) * 0.18);
+    font-size: 0.21em;
     font-weight: 400;
-
     text-transform: uppercase;
     line-height: 1.1;
     white-space: nowrap;
 }
 
-/* EVITAR SELECCIONES */
+/* SIN SELECCIÓN */
 
 body {
     user-select: none;
@@ -143,144 +148,135 @@ body {
 
 <body>
 
-<div class="contenedor" id="contenedor">
+<div class="pantalla" id="pantalla">
 
-    <div class="etiqueta" id="etiqueta">
-        HORA ACTUAL
-    </div>
+    <div class="grupo" id="grupo">
 
-    <div class="hora" id="hora">
-        <span id="horas">00</span><span class="dos-puntos">:</span><span id="minutos">00</span>
-    </div>
+        <div class="etiqueta">
+            HORA ACTUAL
+        </div>
 
-    <div class="fecha" id="fecha">
-        CARGANDO...
+        <div class="hora">
+            <span id="horas">00</span><span class="dos-puntos">:</span><span id="minutos">00</span>
+        </div>
+
+        <div class="fecha" id="fecha">
+            CARGANDO...
+        </div>
+
     </div>
 
 </div>
 
 <script>
 
-/* =========================================
-   ESCALADO AUTOMÁTICO DE TODO EL DISEÑO
-========================================= */
+/* =====================================
+   ESCALADO REAL DE TODO EL CONTENIDO
+===================================== */
 
-const contenedor = document.getElementById('contenedor');
-const reloj = document.getElementById('hora');
+const pantalla = document.getElementById('pantalla');
+const grupo = document.getElementById('grupo');
 
-let ajustePendiente = false;
+function ajustarContenido() {
 
-function ajustarDiseno() {
+    // DIMENSIONES REALES DEL ÁREA
 
-    const ancho = document.documentElement.clientWidth;
-    const alto = document.documentElement.clientHeight;
+    const ancho = pantalla.clientWidth;
+    const alto = pantalla.clientHeight;
 
     if (!ancho || !alto) return;
 
-    // MEDIR EL TAMAÑO REAL DE MONTSERRAT
+    // QUITAR ESCALA ANTERIOR PARA MEDIR
 
-    reloj.style.fontSize = '100px';
+    grupo.style.transform = 'scale(1)';
 
-    const medidas = reloj.getBoundingClientRect();
+    // MEDIR TODO EL BLOQUE TIPOGRÁFICO
 
-    const proporcionAncho = medidas.width / 100;
-    const proporcionAlto = medidas.height / 100;
+    const medidas = grupo.getBoundingClientRect();
+
+    const anchoOriginal = medidas.width;
+    const altoOriginal = medidas.height;
+
+    if (!anchoOriginal || !altoOriginal) return;
 
     // MÁRGENES DE SEGURIDAD
 
-    const anchoDisponible = ancho * 0.94;
-    const altoDisponible = alto * 0.90;
+    const anchoDisponible = ancho * 0.96;
+    const altoDisponible = alto * 0.92;
 
-    // PROPORCIONES DE LOS TRES TEXTOS:
-    // HORA: 100%
-    // ETIQUETA: 22%
-    // FECHA: 18%
+    // CALCULAR ESCALA MÁXIMA
 
-    const alturaTotal =
-        proporcionAlto + 0.22 + 0.18 + 0.14;
+    const escalaHorizontal = anchoDisponible / anchoOriginal;
+    const escalaVertical = altoDisponible / altoOriginal;
 
-    // CALCULAR CUÁNTO PUEDE CRECER
+    // UTILIZAR EL MAYOR TAMAÑO POSIBLE SIN RECORTAR
 
-    const limiteAncho =
-        anchoDisponible / proporcionAncho;
-
-    const limiteAlto =
-        altoDisponible / alturaTotal;
-
-    const tamanoFinal = Math.min(
-        limiteAncho,
-        limiteAlto
+    const escalaFinal = Math.min(
+        escalaHorizontal,
+        escalaVertical
     );
 
-    // APLICAR EL MISMO ESCALADO A TODO
+    // APLICAR ESCALA A LOS TRES TEXTOS JUNTOS
 
-    contenedor.style.setProperty(
-        '--clock-size',
-        tamanoFinal + 'px'
-    );
+    grupo.style.transform = `scale(${escalaFinal})`;
 
 }
 
-// ACTUALIZAR AL CARGAR MONTSERRAT
+// ESPERAR LA TIPOGRAFÍA
 
-async function iniciarDiseno() {
+async function iniciar() {
 
     try {
         await document.fonts.load('italic 800 100px Montserrat');
         await document.fonts.load('400 100px Montserrat');
         await document.fonts.ready;
     } catch (error) {
-        console.log('Usando fuente alternativa');
+        console.log('Se utilizará una fuente alternativa');
     }
 
-    ajustarDiseno();
+    ajustarContenido();
 
 }
 
-// DETECTAR CAMBIOS DE TAMAÑO
+// DETECTAR CAMBIOS DE DIMENSIONES
 
-function solicitarAjuste() {
+let temporizador = null;
 
-    if (ajustePendiente) return;
-
-    ajustePendiente = true;
-
-    requestAnimationFrame(() => {
-        ajustarDiseno();
-        ajustePendiente = false;
-    });
-
+function actualizarEscala() {
+    clearTimeout(temporizador);
+    temporizador = setTimeout(ajustarContenido, 50);
 }
 
-window.addEventListener('resize', solicitarAjuste);
-window.addEventListener('orientationchange', solicitarAjuste);
+window.addEventListener('resize', actualizarEscala);
+window.addEventListener('orientationchange', actualizarEscala);
 
-// DETECTAR CAMBIOS DEL ÁREA DEL REPRODUCTOR
+// OBSERVAR EL ÁREA DE REPRODUCCIÓN
 
 if ('ResizeObserver' in window) {
 
-    const observador = new ResizeObserver(() => {
-        solicitarAjuste();
-    });
-
-    observador.observe(document.documentElement);
+    const observador = new ResizeObserver(actualizarEscala);
+    observador.observe(pantalla);
 
 }
 
-// INICIAR ESCALADO
+// DETECTAR CUANDO CARGA LA FUENTE
 
-iniciarDiseno();
+document.fonts.addEventListener('loadingdone', ajustarContenido);
+
+// INICIAR
+
+iniciar();
 
 
-/* =========================================
-   RELOJ CON HORA DE GUATEMALA
-========================================= */
+/* =====================================
+   HORA ACTUAL DE GUATEMALA
+===================================== */
 
 function actualizarReloj() {
 
     const ahora = new Date();
 
-    // HORA DE GUATEMALA
+    // HORA GUATEMALA
 
     const formatoHora = new Intl.DateTimeFormat('es-GT', {
         timeZone: 'America/Guatemala',
@@ -297,7 +293,7 @@ function actualizarReloj() {
     document.getElementById('horas').textContent = horas;
     document.getElementById('minutos').textContent = minutos;
 
-    // FECHA DE GUATEMALA
+    // FECHA GUATEMALA
 
     const formatoFecha = new Intl.DateTimeFormat('es-GT', {
         timeZone: 'America/Guatemala',
@@ -310,11 +306,9 @@ function actualizarReloj() {
 
 }
 
-// ACTUALIZAR INMEDIATAMENTE
+// ACTUALIZAR RELOJ
 
 actualizarReloj();
-
-// ACTUALIZAR CADA SEGUNDO
 
 setInterval(actualizarReloj, 1000);
 
