@@ -7,11 +7,16 @@
 
 <title>RELOJ GUATEMALA</title>
 
+<!-- FUENTE MONTSERRAT -->
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;0,800;1,800&display=swap" rel="stylesheet">
 
 <style>
+
+/* CONFIGURACIÓN GENERAL */
 
 * {
     margin: 0;
@@ -53,10 +58,6 @@ body {
             #07123D 50%,
             #080625 100%
         );
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 /* CONTENEDOR */
@@ -69,33 +70,37 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 2vmin;
-    gap: 0;
+
+    padding: 2%;
+    overflow: hidden;
 }
 
-/* ETIQUETA */
+/* ETIQUETA SUPERIOR */
 
 .etiqueta {
-    font-size: clamp(20px, 4.5vmin, 90px);
+    font-size: 40px;
     font-weight: 800;
     font-style: italic;
     text-transform: uppercase;
-    margin-bottom: 1vmin;
+    line-height: 1.1;
+    white-space: nowrap;
+    margin-bottom: 1.5%;
 }
 
-/* HORA PRINCIPAL */
+/* RELOJ PRINCIPAL */
 
 .hora {
-    font-size: clamp(48px, 34vmin, 900px);
+    font-size: 200px;
     font-weight: 800;
     font-style: italic;
     line-height: 0.95;
     letter-spacing: -0.065em;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
 }
 
-/* DOS PUNTOS */
+/* DOS PUNTOS PARPADEANTES */
 
 .dos-puntos {
     display: inline-block;
@@ -115,11 +120,19 @@ body {
 /* FECHA */
 
 .fecha {
-    font-size: clamp(18px, 4.2vmin, 85px);
+    font-size: 40px;
     font-weight: 400;
     text-transform: uppercase;
-    margin-top: 2vmin;
-    letter-spacing: 0.01em;
+    line-height: 1.1;
+    white-space: nowrap;
+    margin-top: 2%;
+}
+
+/* EVITAR SELECCIONES */
+
+body {
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 </style>
@@ -129,10 +142,12 @@ body {
 
 <div class="contenedor">
 
-    <div class="etiqueta">HORA ACTUAL</div>
+    <div class="etiqueta" id="etiqueta">
+        HORA ACTUAL
+    </div>
 
     <div class="hora" id="hora">
-        00<span class="dos-puntos">:</span>00
+        <span id="horas">00</span><span class="dos-puntos">:</span><span id="minutos">00</span>
     </div>
 
     <div class="fecha" id="fecha">
@@ -143,43 +158,163 @@ body {
 
 <script>
 
+/* ======================================
+   AJUSTE AUTOMÁTICO PARA CUALQUIER PANTALLA
+====================================== */
+
+const reloj = document.getElementById('hora');
+const etiqueta = document.getElementById('etiqueta');
+const fecha = document.getElementById('fecha');
+
+let ajustePendiente = false;
+
+function ajustarReloj() {
+
+    const ancho = document.documentElement.clientWidth;
+    const alto = document.documentElement.clientHeight;
+
+    if (!ancho || !alto) return;
+
+    // MEDIR LA TIPOGRAFÍA REAL
+
+    const canvas = document.createElement('canvas');
+    const contexto = canvas.getContext('2d');
+
+    contexto.font = 'italic 800 100px Montserrat';
+
+    const medida = contexto.measureText('00:00');
+
+    const proporcion = medida.width / 100;
+
+    // ESPACIO DISPONIBLE
+
+    const anchoDisponible = ancho * 0.94;
+    const altoDisponible = alto * 0.58;
+
+    // CALCULAR TAMAÑO MÁXIMO
+
+    const tamanoPorAncho = anchoDisponible / proporcion;
+    const tamanoPorAlto = altoDisponible;
+
+    const tamanoFinal = Math.min(
+        tamanoPorAncho,
+        tamanoPorAlto
+    );
+
+    // APLICAR TAMAÑO AL RELOJ
+
+    reloj.style.fontSize = tamanoFinal + 'px';
+
+    // AJUSTAR LOS OTROS TEXTOS PROPORCIONALMENTE
+
+    etiqueta.style.fontSize = (tamanoFinal * 0.18) + 'px';
+
+    fecha.style.fontSize = (tamanoFinal * 0.15) + 'px';
+
+}
+
+// ESPERAR A QUE CARGUE MONTSERRAT
+
+async function iniciarAjuste() {
+
+    try {
+        await document.fonts.load('italic 800 100px Montserrat');
+        await document.fonts.load('400 100px Montserrat');
+    } catch (error) {
+        // Utilizar fuente alternativa si falla la descarga
+    }
+
+    ajustarReloj();
+}
+
+// ACTUALIZAR SI CAMBIA EL TAMAÑO DEL ÁREA
+
+function solicitarAjuste() {
+
+    if (ajustePendiente) return;
+
+    ajustePendiente = true;
+
+    requestAnimationFrame(() => {
+        ajustarReloj();
+        ajustePendiente = false;
+    });
+
+}
+
+// DETECTAR CAMBIOS DE RESOLUCIÓN
+
+window.addEventListener('resize', solicitarAjuste);
+
+window.addEventListener('orientationchange', solicitarAjuste);
+
+// DETECTAR CAMBIOS DEL CONTENEDOR
+
+if ('ResizeObserver' in window) {
+
+    const observador = new ResizeObserver(solicitarAjuste);
+
+    observador.observe(document.documentElement);
+
+}
+
+// INICIAR
+
+iniciarAjuste();
+
+
+/* ======================================
+   RELOJ CON HORA DE GUATEMALA
+====================================== */
+
 function actualizarReloj() {
 
     const ahora = new Date();
 
-    // HORA DE GUATEMALA
+    // HORA GUATEMALA
 
     const formatoHora = new Intl.DateTimeFormat('es-GT', {
+
         timeZone: 'America/Guatemala',
+
         hour: '2-digit',
         minute: '2-digit',
+
         hour12: false
+
     });
 
     const partes = formatoHora.formatToParts(ahora);
 
     const horas = partes.find(p => p.type === 'hour').value;
+
     const minutos = partes.find(p => p.type === 'minute').value;
 
-    document.getElementById('hora').innerHTML =
-        horas + '<span class="dos-puntos">:</span>' + minutos;
+    document.getElementById('horas').textContent = horas;
 
-    // FECHA DE GUATEMALA
+    document.getElementById('minutos').textContent = minutos;
+
+
+    // FECHA GUATEMALA
 
     const formatoFecha = new Intl.DateTimeFormat('es-GT', {
+
         timeZone: 'America/Guatemala',
+
         day: 'numeric',
         month: 'long'
+
     });
 
-    document.getElementById('fecha').textContent =
-        formatoFecha.format(ahora).toUpperCase();
+    fecha.textContent = formatoFecha.format(ahora).toUpperCase();
 
 }
 
-// ACTUALIZAR RELOJ
+// ACTUALIZAR INMEDIATAMENTE
 
 actualizarReloj();
+
+// ACTUALIZAR CADA SEGUNDO
 
 setInterval(actualizarReloj, 1000);
 
