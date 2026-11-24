@@ -7,11 +7,9 @@
 
 <title>RELOJ GUATEMALA</title>
 
-<!-- FUENTE MONTSERRAT -->
-
+<!-- MONTSERRAT -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;0,800;1,800&display=swap" rel="stylesheet">
 
 <style>
@@ -63,38 +61,43 @@ body {
 /* CONTENEDOR */
 
 .contenedor {
+    --clock-size: 200px;
+
     width: 100%;
     height: 100%;
+
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
-    text-align: center;
+    align-items: center;
 
-    padding: 2%;
-    overflow: hidden;
+    text-align: center;
+    padding: 3%;
+
+    gap: calc(var(--clock-size) * 0.035);
 }
 
-/* ETIQUETA SUPERIOR */
+/* TEXTO SUPERIOR */
 
 .etiqueta {
-    font-size: 40px;
+    font-size: calc(var(--clock-size) * 0.22);
     font-weight: 800;
     font-style: italic;
     text-transform: uppercase;
-    line-height: 1.1;
+    line-height: 1.05;
     white-space: nowrap;
-    margin-bottom: 1.5%;
 }
 
-/* RELOJ PRINCIPAL */
+/* HORA PRINCIPAL */
 
 .hora {
-    font-size: 200px;
+    font-size: var(--clock-size);
     font-weight: 800;
     font-style: italic;
+
     line-height: 0.95;
     letter-spacing: -0.065em;
+
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
     flex-shrink: 0;
@@ -120,12 +123,12 @@ body {
 /* FECHA */
 
 .fecha {
-    font-size: 40px;
+    font-size: calc(var(--clock-size) * 0.18);
     font-weight: 400;
+
     text-transform: uppercase;
     line-height: 1.1;
     white-space: nowrap;
-    margin-top: 2%;
 }
 
 /* EVITAR SELECCIONES */
@@ -140,7 +143,7 @@ body {
 
 <body>
 
-<div class="contenedor">
+<div class="contenedor" id="contenedor">
 
     <div class="etiqueta" id="etiqueta">
         HORA ACTUAL
@@ -158,76 +161,83 @@ body {
 
 <script>
 
-/* ======================================
-   AJUSTE AUTOMÁTICO PARA CUALQUIER PANTALLA
-====================================== */
+/* =========================================
+   ESCALADO AUTOMÁTICO DE TODO EL DISEÑO
+========================================= */
 
+const contenedor = document.getElementById('contenedor');
 const reloj = document.getElementById('hora');
-const etiqueta = document.getElementById('etiqueta');
-const fecha = document.getElementById('fecha');
 
 let ajustePendiente = false;
 
-function ajustarReloj() {
+function ajustarDiseno() {
 
     const ancho = document.documentElement.clientWidth;
     const alto = document.documentElement.clientHeight;
 
     if (!ancho || !alto) return;
 
-    // MEDIR LA TIPOGRAFÍA REAL
+    // MEDIR EL TAMAÑO REAL DE MONTSERRAT
 
-    const canvas = document.createElement('canvas');
-    const contexto = canvas.getContext('2d');
+    reloj.style.fontSize = '100px';
 
-    contexto.font = 'italic 800 100px Montserrat';
+    const medidas = reloj.getBoundingClientRect();
 
-    const medida = contexto.measureText('00:00');
+    const proporcionAncho = medidas.width / 100;
+    const proporcionAlto = medidas.height / 100;
 
-    const proporcion = medida.width / 100;
-
-    // ESPACIO DISPONIBLE
+    // MÁRGENES DE SEGURIDAD
 
     const anchoDisponible = ancho * 0.94;
-    const altoDisponible = alto * 0.58;
+    const altoDisponible = alto * 0.90;
 
-    // CALCULAR TAMAÑO MÁXIMO
+    // PROPORCIONES DE LOS TRES TEXTOS:
+    // HORA: 100%
+    // ETIQUETA: 22%
+    // FECHA: 18%
 
-    const tamanoPorAncho = anchoDisponible / proporcion;
-    const tamanoPorAlto = altoDisponible;
+    const alturaTotal =
+        proporcionAlto + 0.22 + 0.18 + 0.14;
+
+    // CALCULAR CUÁNTO PUEDE CRECER
+
+    const limiteAncho =
+        anchoDisponible / proporcionAncho;
+
+    const limiteAlto =
+        altoDisponible / alturaTotal;
 
     const tamanoFinal = Math.min(
-        tamanoPorAncho,
-        tamanoPorAlto
+        limiteAncho,
+        limiteAlto
     );
 
-    // APLICAR TAMAÑO AL RELOJ
+    // APLICAR EL MISMO ESCALADO A TODO
 
-    reloj.style.fontSize = tamanoFinal + 'px';
-
-    // AJUSTAR LOS OTROS TEXTOS PROPORCIONALMENTE
-
-    etiqueta.style.fontSize = (tamanoFinal * 0.18) + 'px';
-
-    fecha.style.fontSize = (tamanoFinal * 0.15) + 'px';
+    contenedor.style.setProperty(
+        '--clock-size',
+        tamanoFinal + 'px'
+    );
 
 }
 
-// ESPERAR A QUE CARGUE MONTSERRAT
+// ACTUALIZAR AL CARGAR MONTSERRAT
 
-async function iniciarAjuste() {
+async function iniciarDiseno() {
 
     try {
         await document.fonts.load('italic 800 100px Montserrat');
         await document.fonts.load('400 100px Montserrat');
+        await document.fonts.ready;
     } catch (error) {
-        // Utilizar fuente alternativa si falla la descarga
+        console.log('Usando fuente alternativa');
     }
 
-    ajustarReloj();
+    ajustarDiseno();
+
 }
 
-// ACTUALIZAR SI CAMBIA EL TAMAÑO DEL ÁREA
+// DETECTAR CAMBIOS DE TAMAÑO
 
 function solicitarAjuste() {
 
@@ -236,77 +246,67 @@ function solicitarAjuste() {
     ajustePendiente = true;
 
     requestAnimationFrame(() => {
-        ajustarReloj();
+        ajustarDiseno();
         ajustePendiente = false;
     });
 
 }
 
-// DETECTAR CAMBIOS DE RESOLUCIÓN
-
 window.addEventListener('resize', solicitarAjuste);
-
 window.addEventListener('orientationchange', solicitarAjuste);
 
-// DETECTAR CAMBIOS DEL CONTENEDOR
+// DETECTAR CAMBIOS DEL ÁREA DEL REPRODUCTOR
 
 if ('ResizeObserver' in window) {
 
-    const observador = new ResizeObserver(solicitarAjuste);
+    const observador = new ResizeObserver(() => {
+        solicitarAjuste();
+    });
 
     observador.observe(document.documentElement);
 
 }
 
-// INICIAR
+// INICIAR ESCALADO
 
-iniciarAjuste();
+iniciarDiseno();
 
 
-/* ======================================
+/* =========================================
    RELOJ CON HORA DE GUATEMALA
-====================================== */
+========================================= */
 
 function actualizarReloj() {
 
     const ahora = new Date();
 
-    // HORA GUATEMALA
+    // HORA DE GUATEMALA
 
     const formatoHora = new Intl.DateTimeFormat('es-GT', {
-
         timeZone: 'America/Guatemala',
-
         hour: '2-digit',
         minute: '2-digit',
-
         hour12: false
-
     });
 
     const partes = formatoHora.formatToParts(ahora);
 
     const horas = partes.find(p => p.type === 'hour').value;
-
     const minutos = partes.find(p => p.type === 'minute').value;
 
     document.getElementById('horas').textContent = horas;
-
     document.getElementById('minutos').textContent = minutos;
 
-
-    // FECHA GUATEMALA
+    // FECHA DE GUATEMALA
 
     const formatoFecha = new Intl.DateTimeFormat('es-GT', {
-
         timeZone: 'America/Guatemala',
-
         day: 'numeric',
         month: 'long'
-
     });
 
-    fecha.textContent = formatoFecha.format(ahora).toUpperCase();
+    document.getElementById('fecha').textContent =
+        formatoFecha.format(ahora).toUpperCase();
 
 }
 
