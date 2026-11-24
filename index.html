@@ -13,6 +13,8 @@
 
 <style>
 
+/* CONFIGURACIÓN GENERAL */
+
 * {
     margin: 0;
     padding: 0;
@@ -27,6 +29,7 @@ html, body {
 
 body {
     font-family: 'Montserrat', sans-serif;
+    color: #FFFFFF;
 
     background:
         radial-gradient(
@@ -56,7 +59,6 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #FFFFFF;
 }
 
 /* CONTENEDOR */
@@ -69,26 +71,26 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 3vmin;
+    padding: 2vw;
 }
 
-/* ETIQUETA */
+/* TEXTO SUPERIOR */
 
 .etiqueta {
-    font-size: 4.2vmin;
+    font-size: clamp(22px, 3vw, 65px);
     font-weight: 800;
     font-style: italic;
     text-transform: uppercase;
-    margin-bottom: 0.8vmin;
+    margin-bottom: 1vw;
 }
 
-/* RELOJ */
+/* HORA */
 
 .hora {
-    font-size: clamp(48px, 27vmin, 900px);
+    font-size: clamp(65px, 14vw, 900px);
     font-weight: 800;
     font-style: italic;
-    line-height: 0.95;
+    line-height: 1;
     letter-spacing: -0.065em;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
@@ -114,10 +116,10 @@ body {
 /* FECHA */
 
 .fecha {
-    font-size: 4vmin;
+    font-size: clamp(20px, 3vw, 65px);
     font-weight: 400;
     text-transform: uppercase;
-    margin-top: 2vmin;
+    margin-top: 1.5vw;
     letter-spacing: 0.01em;
 }
 
@@ -142,11 +144,13 @@ body {
 
 <script>
 
-// RELOJ CON HORA DE GUATEMALA
+/* RELOJ CON HORA DE GUATEMALA */
 
 function actualizarReloj() {
 
     const ahora = new Date();
+
+    // HORA DE GUATEMALA
 
     const formatoHora = new Intl.DateTimeFormat('es-GT', {
         timeZone: 'America/Guatemala',
@@ -176,9 +180,11 @@ function actualizarReloj() {
 
 }
 
-// ACTUALIZACIÓN AUTOMÁTICA
+// ACTUALIZAR INMEDIATAMENTE
 
 actualizarReloj();
+
+// ACTUALIZAR CADA SEGUNDO
 
 setInterval(actualizarReloj, 1000);
 
