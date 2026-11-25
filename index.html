@@ -87,16 +87,6 @@ body {
     will-change: transform;
 }
 
-/* TEXTO SUPERIOR */
-
-.etiqueta {
-    font-size: 0.24em;
-    font-weight: 800;
-    font-style: italic;
-    text-transform: uppercase;
-    line-height: 1.1;
-}
-
 /* HORA */
 
 .hora {
@@ -129,7 +119,7 @@ body {
 /* FECHA */
 
 .fecha {
-    font-size: 0.21em;
+    font-size: 0.15em;
     font-weight: 400;
     text-transform: uppercase;
     line-height: 1.1;
@@ -152,16 +142,12 @@ body {
 
     <div class="grupo" id="grupo">
 
-        <div class="etiqueta">
-            HORA ACTUAL
-        </div>
-
         <div class="hora">
             <span id="horas">00</span><span class="dos-puntos">:</span><span id="minutos">00</span>
         </div>
 
         <div class="fecha" id="fecha">
-            CARGANDO...
+            HORA ACTUAL, CARGANDO...
         </div>
 
     </div>
@@ -179,18 +165,12 @@ const grupo = document.getElementById('grupo');
 
 function ajustarContenido() {
 
-    // DIMENSIONES REALES DEL ÁREA
-
     const ancho = pantalla.clientWidth;
     const alto = pantalla.clientHeight;
 
     if (!ancho || !alto) return;
 
-    // QUITAR ESCALA ANTERIOR PARA MEDIR
-
     grupo.style.transform = 'scale(1)';
-
-    // MEDIR TODO EL BLOQUE TIPOGRÁFICO
 
     const medidas = grupo.getBoundingClientRect();
 
@@ -199,24 +179,18 @@ function ajustarContenido() {
 
     if (!anchoOriginal || !altoOriginal) return;
 
-    // MÁRGENES DE SEGURIDAD
+    // MÁRGENES DEL 85%
 
-    const anchoDisponible = ancho * 0.96;
-    const altoDisponible = alto * 0.92;
-
-    // CALCULAR ESCALA MÁXIMA
+    const anchoDisponible = ancho * 0.85;
+    const altoDisponible = alto * 0.85;
 
     const escalaHorizontal = anchoDisponible / anchoOriginal;
     const escalaVertical = altoDisponible / altoOriginal;
-
-    // UTILIZAR EL MAYOR TAMAÑO POSIBLE SIN RECORTAR
 
     const escalaFinal = Math.min(
         escalaHorizontal,
         escalaVertical
     );
-
-    // APLICAR ESCALA A LOS TRES TEXTOS JUNTOS
 
     grupo.style.transform = `scale(${escalaFinal})`;
 
@@ -297,12 +271,17 @@ function actualizarReloj() {
 
     const formatoFecha = new Intl.DateTimeFormat('es-GT', {
         timeZone: 'America/Guatemala',
-        day: 'numeric',
-        month: 'long'
+        day: '2-digit',
+        month: 'short'
     });
 
+    const partesFecha = formatoFecha.formatToParts(ahora);
+
+    const dia = partesFecha.find(p => p.type === 'day').value;
+    const mes = partesFecha.find(p => p.type === 'month').value;
+
     document.getElementById('fecha').textContent =
-        formatoFecha.format(ahora).toUpperCase();
+        `HORA ACTUAL, ${dia} DE ${mes}`.toUpperCase();
 
 }
 
